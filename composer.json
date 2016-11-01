@@ -1,0 +1,28 @@
+{
+  "name": "replicant",
+  "description": "Just another droid.",
+  "keywords": ["chatterbot", "ia", "bot", "php"],
+  "homepage": "https://rodrigocnascimento.github.io/replicant",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Rodrigo Nascimento",
+      "email": "rodrigocesarnascimento@gmail.com",
+      "homepage": "https://rodrigocnascimento.github.io/"
+    }
+  ],
+  "require": {
+    "php": ">=5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Bots\\" : "src/Bots/",
+      "Services\\" : "src/Services/",
+      "Helpers\\" : "src/Helpers/",
+      "Factory\\" : "src/Factory/",
+      "Controllers\\" : "src/Controllers/",
+      "Commands\\" : "src/Commands/",
+      "AI\\" : "src/AI/"
+    }
+  }
+}
