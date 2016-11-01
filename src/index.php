@@ -1,11 +1,10 @@
 <?php
 include_once '../vendor/autoload.php';
 
+use \Controllers\BotController;
+
 $settings = include_once 'settings.php';
 $botConfigs = $settings['botConfigs'];
-
-use \Helpers\cURL;
-use \Controllers\BotController;
 
 /**
  * Exemplo de Requisição enviada para subscribe da page
