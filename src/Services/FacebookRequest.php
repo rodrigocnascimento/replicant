@@ -39,6 +39,8 @@ class FacebookRequest extends AbstractRequest
     */
     public $botRequest = [];
 
+    public $analytics;
+
     /**
     * [__construct description]
     * @param array $userInput Entrada http raw
@@ -51,6 +53,10 @@ class FacebookRequest extends AbstractRequest
         if (empty($userInput)) {
             throw new \Exception("Empty Request");
         }
+
+        $this->analytics = new BotAnalytics();
+
+        $this->analytics->trackUser($userInput);
 
         $this->setBotId($userInput['entry'][0]['id']);
 
@@ -240,6 +246,7 @@ class FacebookRequest extends AbstractRequest
             $request = $this->botRequest + $payload;
 
             $response = $this->curl->call(sprintf($this->messageUriApi, $this->apiUrl), $request, cURL::TYPE_POST);
+            $this->analytics->trackBot($recipientId, $payload, $response);
         }
     }
 }
