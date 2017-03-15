@@ -5,7 +5,11 @@ use \Helpers\cURL;
 
 class BotAnalytics
 {
-    //https://tracker.dashbot.io/track?platform=facebook&v=0.7.4-rest&type=incoming&apiKey=F3UvA7puGJ1RMvogsk09HEKKzy9uJq9E5NKoNoji
+    //https://tracker.dashbot.io/track
+    //?platform=facebook
+    //&v=0.7.4-rest
+    //&type=incoming
+    //&apiKey=F3UvA7puGJ1RMvogsk09HEKKzy9uJq9E5NKoNoji
     public $apiUrl = 'https://tracker.dashbot.io';
     public $apiVersion = '0.7.4-rest';
     public $apiPlatform = 'facebook';
@@ -28,11 +32,11 @@ class BotAnalytics
 
         $dataInput = [
             'qs' => [
-                'access_token' => getenv('BOT_TOKEN') . 'ZFDE',
+                'access_token' => getenv('BOT_TOKEN'),
             ],
             'uri' => "https://graph.facebook.com/v2.6/me/messages",
             'json' => [
-                'message' => $payload,
+                'message' => $payload['message'],
                 'recipient' => [
                     'id' => $recipientId
                 ]

@@ -14,7 +14,7 @@ class RequestFactory extends AbstractRequestFactory
     */
     public static function build(array $requestPayloader, array $request)
     {
-        $payloaderClass = $requestPayloader['className'];
+        $payloaderClass = $requestPayloader['service'];
 
         if(class_exists($payloaderClass)) {
             return new $payloaderClass($request);

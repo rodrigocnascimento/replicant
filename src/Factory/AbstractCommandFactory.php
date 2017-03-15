@@ -9,19 +9,17 @@ class AbstractCommandFactory extends AbstractCommand
 	 * @param  BotInterface     $superClassBot Bot que está sendo executado
 	 * @return CommandInterface Comandos do payloader
 	 */
-	public static function initCommands(AbstractRequest $request, $superClassBot) {
-
-		$stringClass = sprintf("\\Commands\\%sCommands", $request->request['payloader']);
-
-		if (class_exists($stringClass)) {
-			$commandClass = new $stringClass();
+	public static function initCommands($payloader, AbstractRequest $request, $superClassBot) 
+	{
+		if (class_exists($payloader['bot']['command'])) {
+			$commandClass = new $payloader['bot']['command']();
 
 			$commandClass->setLazyLoad($request, $superClassBot);
 
 			return $commandClass;
 		}
 
-		throw new \Exception('Class not found');
+		throw new \Exception("Class not found");
 	}
 
 	public function commandNotFound() {}

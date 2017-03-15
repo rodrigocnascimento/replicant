@@ -4,7 +4,7 @@ namespace Helpers\Facebook;
 class QuickReply
 {
 
-  protected $struct = ['message' => ['attachment' => []]];
+  protected $struct = ['message' => []];
 
   public function __construct($text = null, array $quickReplies)
   {

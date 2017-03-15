@@ -4,13 +4,8 @@ namespace Commands;
 use \Commands\CommandInterface;
 use \Bots\BotInterface;
 use \Factory\AbstractRequest;
-use \AI\WordPattern;
-use \Helpers\Facebook\SimpleMessage as SimpleMessage;
-use \Helpers\Facebook\StickerMessage as StickerMessage;
-use \Helpers\Facebook\ButtonMessage as ButtonMessage;
-use \Helpers\Facebook\ImageMessage as ImageMessage;
-use \Helpers\Facebook\QuickReply as QuickReply;
-use \Helpers\Facebook\GenericTemplate as GenericTemplate;
+use \AI\Models\RePL;
+use \Services\FirebaseFacade as Firebase;
 
 class FacebookCommands extends CommandInterface
 {
@@ -21,7 +16,7 @@ class FacebookCommands extends CommandInterface
     public $requesterPayload;
     /**
      * Bot que está executando os comandos
-     * @var [type]
+     * @var BotInterface
      */
     public $superClassBot;
     /**
@@ -29,23 +24,24 @@ class FacebookCommands extends CommandInterface
      * @var [type]
      */
     protected $userProfileData = [];
-
-    public function __construct() {}
-
     /**
-    * Atribui os dados ao usuário que interage co o Bot
-    * @param [type] $userProfileData [description]
-    */
-    public function setUserData($userProfileData)
+     * $Firebase FirebaseFacade
+     * @var FirebaseFacade
+     */
+    public $firebase;
+    /**
+     * [__construct description]
+     */
+    public function __construct() 
     {
-        $this->userProfileData = $userProfileData;
+        $this->firebase = new Firebase();
     }
 
     /**
     * Envia a mensagem para o usuário que está interagindo com o bot
     * @return
     */
-    public function sendMessage()
+    public function executeBotCommand()
     {
         $userInput = $this->requesterPayload->getRequest();
 
@@ -53,29 +49,25 @@ class FacebookCommands extends CommandInterface
 
             $recipientId = $userInput['payload']['sender']['id'];
 
-            $this->responseMessage = $this->setResponseMessage($userInput);
+            if (!method_exists($this, $userInput['type'])) {
+                throw new \Exception("Método da Classe não existe");
+            }
+            /**
+             * Executa o método requisitado pelo payloader
+             * @var [type]
+             */
+            $this->responseMessage = $this->{$userInput['type']}($userInput);
 
             $this->requesterPayload->sendMessage($this->responseMessage, $recipientId);
         }
     }
 
-    /**
-     * Atribui a mensagem enviada ao bot
-     * com o tipo de mensagem envada pelo usuário
-     * @param array $userInput Entrada do usuário
-     */
-    public function setResponseMessage($userInput)
+    public function executePayloaderCommand($userPayload)
     {
+        list($method) = explode(':', $userPayload);
 
-        if (!method_exists($this, $userInput['type'])) {
-            $message = sprintf('Eu não entendi o comando!', $this->userProfileData['first_name']);
-            $simpleMessage = new SimpleMessage($message);
-            return $simpleMessage->getMessage();
-        }
-
-        return $this->{$userInput['type']}($userInput);
+        return $this->execute($method, $userPayload);
     }
-
     /**
      * Atribui as propiedades
      * @param AbstractRequest $requesterPayload Request do payloader
@@ -88,10 +80,10 @@ class FacebookCommands extends CommandInterface
     }
 
     /**
-    * Executa um comando
+    * Executa o comando do bot, requisitado pela interface
     * @param  string $command Nome do comando a ser executado
     * @param  [type] $args   Argumentos do comando
-    * @return BotInterface::commands Retorna os comandos a serm execurados ou nada
+    * @return BotInterface::commands Retorna o comando executado
     */
     public function execute($command, $args = null)
     {
@@ -102,29 +94,59 @@ class FacebookCommands extends CommandInterface
     }
 
     /**
-    * Retorno de mensagem
+    * Retorno de mensagem do Facebook
     * @param  [type] $userInput [description]
-    * @return [type]            [description]
+    * @return array $resuklt
     */
     public function message($userInput)
     {
         /**
-        * Envia os dados para serem analisados para determinar o que fazer
-        * - PLN
+        * Envia os dados para serem analisados para determinar a ação
+        * - RePL
+        *     - Solução própria baseada em regex
+        * - NLP
+        *     - Api.ai
         * - Machine Learning
         * - Deep Learning
         */
-        $wordPattern = new WordPattern();
-        $userIntent = $wordPattern->setUserIntent($userInput['payload']['message']['text']);
+        $replClass = $this->superClassBot->payloader['bot']['AI']['regex'];
+        if (!class_exists($replClass)) {
+            throw new \Exception("Class does not exist");
+        }
+
+        $repl = new $replClass();
+        $repl->setUserIntent($userInput['payload']['message']['text']);
+        /**
+         * Intenções do usuário
+         * @var [array]
+         */
+        $userIntent = $repl->getUserIntent();
+        list($userIntent) = $userIntent;
+
+        /**
+         * Aqui, tenho que mudar para o State Pattern, 
+         * mas por enquanto fica somente assim mesmo
+         *
+         * Verifica se o usuário está em algum estado específico
+         * @var array
+         */
+        $senderId = $userInput['payload']['sender']['id'];
+        $userPath = sprintf('/users/%s/state', $senderId);
+        $userState = $this->firebase->_toArray($this->firebase->get($userPath));
+
+        if (!is_null($userState)) {
+            if ($userIntent === 'cancelState') {
+                return $this->superClassBot->cancelState($userState);
+            }
+            return $this->superClassBot->state($userInput, $userState);
+        }
 
         $result = $this->execute($userIntent, $userInput);
 
         if (!$result) {
-            $message = $this->superClassBot->commandNotFound();
-            $simpleMessage = new SimpleMessage($message);
-
-            return $simpleMessage->getMessage();
+            return $this->superClassBot->commandNotFound();
         }
+
         return $result;
     }
 
@@ -135,9 +157,9 @@ class FacebookCommands extends CommandInterface
     */
     public function postback($userInput)
     {
-        $method = explode(':', $userInput['payload']['postback']['payload']);
+        $userPayload = $userInput['payload']['postback']['payload'];
 
-        $responseMessage = $this->execute($method[0], $userInput);
+        $responseMessage = $this->executePayloaderCommand($userPayload);
 
         return $responseMessage;
     }
@@ -148,9 +170,10 @@ class FacebookCommands extends CommandInterface
     */
     public function quick_reply($userInput)
     {
-        $method = $userInput['payload']['message']['quick_reply']['payload'];
+        $userPayload = $userInput['payload']['message']['quick_reply']['payload'];
 
-        $responseMessage = $this->execute($method, $userInput);
+        $responseMessage = $this->executePayloaderCommand($userPayload);
+        
         return $responseMessage;
     }
 }

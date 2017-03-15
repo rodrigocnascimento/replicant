@@ -8,11 +8,9 @@ abstract class CommandInterface
 {
     abstract public function __construct();
 
-    abstract public function setUserData($userProfileData);
-
-    abstract public function sendMessage();
-
-    abstract public function setResponseMessage($userInput);
-
     abstract public function setLazyLoad(AbstractRequest $requesterPayload, BotInterface $superClassBot);
+
+    abstract public function executeBotCommand();
+
+    abstract public function executePayloaderCommand($userInput);
 }

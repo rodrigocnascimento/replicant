@@ -237,7 +237,7 @@ class FacebookRequest extends AbstractRequest
     {
         $this->botRequest['recipient']['id'] = $recipientId;
 
-        if (count($messagePayload) >= 1) {
+        if (count($messagePayload) <= 1) {
             $messagePayload[0] = $messagePayload;
             unset($messagePayload['message']);
         }

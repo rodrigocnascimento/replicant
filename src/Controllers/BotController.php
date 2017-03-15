@@ -1,39 +1,42 @@
 <?php
 namespace Controllers;
 
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
-use \Slim\Container;
 use \Controllers\AbstractControllerInterface;
 use \Bots\BotFactory;
 use \Services\RequestFactory;
+use \Helpers\cURL;
 
 class BotController extends AbstractControllerInterface
 {
-    protected $botConfigs;
-
-    // @todo determinar o payloader através de uma abstractfactory?
+    /**
+     * [$payloader description]
+     * @var [type]
+     */
     protected $payloader = [
         'name' => 'Facebook',
-        'className' => '\\Services\\FacebookRequest'
+        'service' => '\\Services\\FacebookRequest',
+        'bot' => [
+            'class' => '\\Bots\\ReplicantBot',
+            'command' => '\\Commands\\FacebookCommands',
+            'AI' => [
+                'regex' => '\\AI\\Models\\Replicant\\ReplicantRepl',
+            ]
+        ]
     ];
     /**
     * [__construct]
     * @param array $botConf Configurações do Bot
     */
-    public function __construct(array $botConfigs)
-    {
-        $this->botConfigs = $botConfigs;
-    }
+    public function __construct() { }
 
-    public function handleWebhookGet()
+    public function get()
     {
-        $token = $this->botConfigs[$this->payloader['name']]['hub_verify_token'];
+        $token = getenv('BOT_VERIFY_TOKEN');
         $this->subscribe($token);
         return ;
     }
 
-    public function handleWebhookPost()
+    public function post()
     {
         $this->dispatch();
         return ;
@@ -69,7 +72,7 @@ class BotController extends AbstractControllerInterface
 
 
     /**
-     * Exemplo de requisição comum, vinda do Facebook
+     * Exemplo de requisição, vinda do Facebook
      *
      * POST /index.php HTTP/1.1
      * Host: *.host.*
@@ -99,7 +102,7 @@ class BotController extends AbstractControllerInterface
      *                "message":{
      *                   "mid":"mid.1478004964352:4be33d7e10",
      *                   "seq":639,
-     *                   "text":"oi"
+     *                   "text":"Hello World!"
      *                }
      *             }
      *          ]
@@ -109,14 +112,22 @@ class BotController extends AbstractControllerInterface
      */
     public function dispatch()
     {
-        $request = json_decode(file_get_contents('php://input'), true);
+        $request = $this->getArrayDataPayload();
+        
+        $payloaderRequest = RequestFactory::build($this->payloader, $request);
 
-        $requesterPayload = RequestFactory::build($this->payloader, $request);
+        if (isset($payloaderRequest->request['payload']['sender']['id'])) {
+            $curl = new cURL();
+            $url = 'https://graph.facebook.com/v2.6/me/messages?access_token='.getenv('BOT_TOKEN');
+            $data = ['recipient' => ['id' => $payloaderRequest->request['payload']['sender']['id']], 'sender_action' => 'typing_on'];
+            
+            $response = $curl->call($url, $data, cURL::TYPE_POST);    
+        }
 
-        $botResolver = BotFactory::assemble($requesterPayload, $this->botConfigs);
-
-        $botClient = $botResolver->initCommands($requesterPayload, $botResolver);
-
-        $botClient->sendMessage();
+        $botResolver = BotFactory::assemble($this->payloader, $payloaderRequest);
+        
+        $botClient = $botResolver->initCommands($this->payloader, $payloaderRequest, $botResolver);
+        
+        $botClient->executeBotCommand();
     }
 }

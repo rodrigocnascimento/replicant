@@ -3,11 +3,9 @@ namespace Controllers;
 
 interface ControllerInterface
 {
-    public function __construct(array $botConfigs);
+    public function __construct();
 
     public function handle();
-
-    public function dispatch();
 
     public function method();
 

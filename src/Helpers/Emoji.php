@@ -1,0 +1,207 @@
+<?php
+namespace Helpers;
+
+class Emoji
+{
+
+  public $emoji = [
+    'saylor' => '⚓️',
+    'pirate_skull' => '☠',
+    'metal_hands' => '🤘',
+    'rat' => '🐀',
+    'robot' => '🤖',
+    'chillin' => '😎',
+    'unicorn' => '🦄',
+    'snake' => '🐍',
+    'dancer' => '👯',
+    'question' => '🤔',
+    'wolf' => '🐺',
+    'cat' => '🐱',
+    'mouse' => '🐭',
+    'hamtaro' => '🐹',
+    'rabbit' => '🐰',
+    'frog' => '🐸',
+    'tiger' => '🐯',
+    'koala' => '🐨',
+    'bear' => '🐻',
+    'pig' => '🐷',
+    'cow' => '🐮',
+    'javali' => '🐗',
+    'monkey' => '🐵',
+    'monkey2' => '🐒',
+    'ass' => '🐴',
+    'sheep' => '🐑',
+    'elefante' => '🐘',
+    'pinguim' => '🐧',
+    'chiken' => '🐔',
+    'octopus' => '🐙',
+    'fish1' => '🐠',
+    'fish2' => '🐟',
+    'fish3' => '🐬',
+    'fish4' => '🐳',
+    'fish5' => '🐡',
+    'horse' => '🐎',
+    'camel' => '🐫',
+    'poddle' => '🐩',
+    'flowers' => '💐',
+    'tulip' => '🌷',
+    'lucky_plant' => '🍀',
+    'rose' => '🌹',
+    'girasol' => '🌻',
+    'red_weed' => '🍁',
+    'cactus' => '🌵',
+    'moon1' => '🌙',
+    'star' => '⭐',
+    'sun' => '☀',
+    'cloud' => '☁',
+    'lightning' => '⚡',
+    'snowman' => '⛄',
+    'rainbow' => '🌈',
+    'happy' => '😄',
+    'smile' => '😃',
+    'smiling' => '😊',
+    'happy2' => '☺',
+    'blink' => '😉',
+    'love_eye' => '😍',
+    'love_kiss' => '😘',
+    'love_kiss2' => '😚',
+    'blink2' => '😜',
+    'blink3' => '😝',
+    'scare' => '😳',
+    'shy' => '😁',
+    'sorry' => '😔',
+    'ok' => '😌',
+    'meh' => '😒',
+    'sorry2' => '😞',
+    'sorry3' => '😣',
+    'sad' => '😢',
+    'lol' => '😂',
+    'tear' => '😭',
+    'sorrow' => '😪',
+    'gulp' => '😥',
+    'trouble' => '😰',
+    'mybad' => '😓',
+    'bua' => '😫',
+    'no' => '😨',
+    'no2' => '😖',
+    'mygod' => '😱',
+    'angry' => '😠',
+    'veryangry' => '😡',
+    'verypissed' => '😤',
+    'hahaha' => '😆',
+    'sick' => '😷',
+    'dead' => '😵',
+    'devil' => '👿',
+    'safado' => '😏',
+    'police' => '👮',
+    'gal' => '👧',
+    'guy' => '👨',
+    'woman' => '👩',
+    'oldmand' => '👴',
+    'boy' => '👵',
+    'man' => '👱',
+    'angel' => '👼',
+    'cat2' => '😺',
+    'cat3' => '😸',
+    'cat_love' => '😻',
+    'cat_kiss' => '😽',
+    'cat_confident' => '😼',
+    'cat_scare' => '🙀',
+    'cat_cry' => '😿',
+    'cat_lol' => '😹',
+    'skull' => '💀',
+    'alien' => '👽',
+    'poop' => '💩',
+    'fire' => '🔥',
+    'sparkle' => '✨',
+    'snhiny_star' => '🌟',
+    'gota' => '💧',
+    'zzz' => '💤',
+    'pum' => '💨',
+    'ear' => '👂',
+    'look' => '👀',
+    'nose' => '👃',
+    'tongue' => '👅',
+    'mouth' => '👄',
+    'ok' => '👍',
+    'nok' => '👎',
+    'ko' => '👌',
+    'punch' => '👊',
+    'peace' => '✌',
+    'hand_up' => '👆',
+    'hand_down' => '👇',
+    'hand_right' => '👉',
+    'hand_left' => '👈',
+    'clap' => '👏',
+    'couple' => '👫',
+    'love' => '💏',
+    'couple_love' => '💑',
+    'hey' => '🙋',
+    'nails' => '💅',
+    'ooo' => '🙍',
+    'queen' => '👑',
+    'hat1' => '👒',
+    'tennis' => '👟',
+    'shoe1' => '👡',
+    'shoe2' => '👠',
+    'shoe3' => '👢',
+    'dress1' => '👕',
+    'dress2' => '👗',
+    'dress3' => '👘',
+    'dress4' => '👙',
+    'purse1' => '👜',
+    'bibelo1' => '🎀',
+    'guardachuva' => '🌂',
+    'batom' => '💄',
+    'heart1' => '❤',
+    'heart2' => '💓',
+    'heart5' => '💛',
+    'heart8' => '💙',
+    'heart3' => '💜',
+    'heart4' => '💚',
+    'heart6' => '💔',
+    'heart7' => '💗',
+    'heart9' => '💖',
+    'heart10' => '💞',
+    'heart11' => '💘',
+    'heart12' => '💌',
+    'kiss' => '💋',
+    'ring' => '💍',
+    'diamond' => '💎',
+    'gift' => '🎁',
+    'noel' => '🎅',
+    'family1'=>'👨‍👩‍👧‍👦',
+    'family2'=>'👩‍👩‍👦',
+    'family3'=>'👨‍👨‍👧‍👦'
+  ];
+
+  public function __construct()
+  {
+  }
+
+  public function getRandomEmoji()
+  {
+
+    $emojiKeys = array_keys($this->emoji);
+    $rand = rand(0, count($emojiKeys) - 1);
+
+    return $this->emoji[$rand];
+  }
+
+  public function getEmoji($emoji)
+  {
+
+    if (empty($emoji))
+    throw new Exception('Precisa de um emoji');
+
+    if (is_array($emoji)) {
+      $_e = "";
+      foreach ($emoji as $key => $e) {
+        $_e .= self::getEmoji($e) . ' ';
+      }
+      return $_e;
+    } else {
+      return $this->emoji[$emoji];
+    }
+  }
+}

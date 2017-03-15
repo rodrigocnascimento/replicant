@@ -5,5 +5,5 @@ use \Factory\AbstractRequest;
 
 interface BotInterface
 {
-  public function __construct(AbstractRequest $request, array $configs);
+  public function __construct(AbstractRequest $request);
 }

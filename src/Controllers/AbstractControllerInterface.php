@@ -1,16 +1,15 @@
 <?php
 namespace Controllers;
 
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
-use \Slim\Container;
 use \Controllers\ControllerInterface;
 use \Bots\BotFactory;
 use \Services\RequestFactory;
+use \Factory\AbstractRequestFactory;
 
 abstract class AbstractControllerInterface implements ControllerInterface
 {
-    abstract public function __construct(array $botConfigs);
+    protected $payloaderInput;
+    abstract public function __construct();
     /**
      * Método que está sendo executado pelo client
      * @return string $_SERVER['REQUEST_METHOD']
@@ -25,7 +24,7 @@ abstract class AbstractControllerInterface implements ControllerInterface
      */
     public function uri()
     {
-        $uri = filter_input(INPUT_SERVER, 'REQUEST_URI');
+        $uri = str_replace('.php', '', filter_input(INPUT_SERVER, 'REQUEST_URI'));
         $uri = ($uri === '/') ? '/index' : $uri;
         return $uri;
     }
@@ -36,9 +35,8 @@ abstract class AbstractControllerInterface implements ControllerInterface
     public function handle()
     {
         if ($this->isWebhook()) {
-            $method = ucfirst(strtolower($this->method()));
-            $webhook  = "handleWebhook{$method}";
-            $this->{$webhook}();
+            $method = strtolower($this->method());
+            $this->{$method}();
             return ;
         }
 
@@ -46,8 +44,10 @@ abstract class AbstractControllerInterface implements ControllerInterface
             $this->renderPage();
             return ;
         }
+
         // if ($this->method() === 'POST') {
-        //     die('posteou');
+        //     header("HTTP/1.1 401 Unauthorized");
+        //     return ;
         // }
     }
     /**
@@ -65,10 +65,13 @@ abstract class AbstractControllerInterface implements ControllerInterface
     public function isPage()
     {
         $uri = $this->uri();
-        $pagesWhitelisted = in_array($uri, [
-            '/termos', '/index'
-        ]);
-        return $pagesWhitelisted;
+        
+        $whiteList = array_map(function($pagePath) {
+            $pagePath = explode('/', $pagePath);
+            return '/' . str_replace('.php', '', $pagePath[count($pagePath) - 1]);
+        }, glob(sprintf('%s/*.php', APP_PUBLIC)));
+        
+        return in_array($uri, $whiteList);
     }
     /**
      * Gera a página que está sendo solicitada pelo client
@@ -77,20 +80,43 @@ abstract class AbstractControllerInterface implements ControllerInterface
     public function renderPage()
     {
         $uri = $this->uri();
-        $layout = sprintf('%s/../../public/layout.php', __DIR__, $uri);
-
-        if (!file_exists($layout)) {
-            echo '<h1>Precisa criar o layout e as páginas.</h1>';
-            return ;
-        }
-
+        $layout = sprintf('%s/layout.php', APP_PUBLIC);
+        
         if (!$this->isPage()) {
             $uri = 'notfound';
         }
 
         $GLOBAL_PAGE_VAR = ['page' => $uri];
+        if (!file_exists($layout)) {
+            throw new \Exception("Precisa criar o layout e as páginas");
+        }
+
         include $layout;
     }
-
-    abstract public function dispatch();
+    /**
+     * [getArrayDataPayload description]
+     * @return [type] [description]
+     */
+    public function getArrayDataPayload()
+    {
+        return json_decode(file_get_contents('php://input'), true);
+    }
+    /**
+     * [getRequesterPayload description]
+     * @return [type] [description]
+     */
+    public function getRequesterPayload()
+    {
+        preg_match('/\/facebook/', $this->uri(), $matches);
+        if (empty($matches)) {
+            header("HTTP/1.1 400 Bad Request");
+            die;
+        }
+        
+        if ($matches[0] === '/facebook') {
+            $payloader = ['name' => 'Facebook', 'className' => '\\Services\\FacebookRequest'];
+        }
+        
+        return $payloader;
+    }
 }

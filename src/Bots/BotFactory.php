@@ -12,12 +12,11 @@ class BotFactory extends AbstractBotFactory
     * @param  array           $configs configurações inicias do bot
     * @return BotInterface    Bot abstraído
     */
-    public static function assemble(AbstractRequest $request, array $configs)
+    public static function assemble($payloader, AbstractRequest $request)
     {
-        $botConfig = $configs[$request->request['payloader']]['Bots'][$request->request['botId']];
-
-        if (class_exists($botConfig['className'])) {
-            $botClass = new $botConfig['className']($request, $botConfig);
+        if (class_exists($payloader['bot']['class'])) {
+            $botClass = new $payloader['bot']['class']($request);
+            $botClass->payloader = $payloader;
         }
 
         return $botClass;
