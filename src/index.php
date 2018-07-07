@@ -42,6 +42,6 @@ function debug($data, $completeBacktrace = false)
 
 	file_put_contents($file, $data, FILE_APPEND | LOCK_EX);
 }
-
+// Invoking the controller
 $controller = new BotController();
 $controller->handle();
